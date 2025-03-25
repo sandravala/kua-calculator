@@ -1,0 +1,207 @@
+/**
+ * Kua Calculator Frontend Styles
+ */
+
+ .kua-calculator-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+.kua-calculator-form {
+    background-color: #f8f8f8;
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.kua-form-row {
+    margin-bottom: 20px;
+}
+
+.kua-form-group {
+    display: block;
+}
+
+.kua-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.kua-form-group select,
+.kua-form-group input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    color: #333;
+    background-color: #fff;
+}
+
+.kua-radio-group {
+    display: flex;
+    gap: 20px;
+}
+
+.kua-radio-group label {
+    display: flex;
+    align-items: center;
+    font-weight: normal;
+    cursor: pointer;
+}
+
+.kua-radio-group input[type="radio"] {
+    margin-right: 8px;
+}
+
+.kua-submit-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    width: 100%;
+    transition: background-color 0.3s;
+}
+
+.kua-submit-button:hover {
+    background-color: #45a049;
+}
+
+.kua-submit-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.kua-result-container {
+    margin-top: 30px;
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-left: 5px solid #4CAF50;
+}
+
+.kua-result-number {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.kua-label {
+    font-weight: 600;
+    margin-right: 10px;
+    color: #333;
+}
+
+.kua-number {
+    font-size: 32px;
+    font-weight: 700;
+    color: #4CAF50;
+}
+
+.kua-result-description {
+    color: #555;
+    line-height: 1.6;
+}
+
+.kua-products {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.kua-products h3 {
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.kua-error-container {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #ffebee;
+    border-left: 5px solid #f44336;
+    border-radius: 4px;
+    color: #d32f2f;
+}
+
+/* Product list styling */
+.kua-product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.kua-product-item {
+    border: 1px solid #eee;
+    border-radius: 4px;
+    overflow: hidden;
+    transition: box-shadow 0.3s;
+}
+
+.kua-product-item:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.kua-product-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+.kua-product-info {
+    padding: 15px;
+}
+
+.kua-product-title {
+    font-weight: 600;
+    margin-bottom: 5px;
+    font-size: 16px;
+}
+
+.kua-product-price {
+    color: #4CAF50;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.kua-product-link {
+    display: inline-block;
+    background-color: #4CAF50;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.kua-product-link:hover {
+    background-color: #45a049;
+    color: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .kua-calculator-form,
+    .kua-result-container {
+        padding: 15px;
+    }
+    
+    .kua-radio-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .kua-product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+}

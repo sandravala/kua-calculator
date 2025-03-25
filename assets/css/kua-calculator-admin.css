@@ -1,0 +1,286 @@
+/**
+ * Kua Calculator Admin Styles
+ */
+
+/* Main container */
+.kua-admin-container {
+    margin: 20px 0;
+}
+
+/* Shortcode display */
+.kua-admin-shortcode-box {
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 15px 20px;
+    margin-bottom: 30px;
+    border-radius: 3px;
+}
+
+.kua-shortcode-display {
+    display: flex;
+    align-items: center;
+    background: #f5f5f5;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    margin-top: 10px;
+}
+
+.kua-shortcode-display code {
+    background: none;
+    padding: 0;
+    margin: 0;
+    font-size: 14px;
+    flex-grow: 1;
+}
+
+.kua-copy-shortcode {
+    margin-left: 10px !important;
+}
+
+/* Product Search Container */
+.kua-product-search-container {
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border-radius: 3px;
+}
+
+.kua-add-product-form {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.kua-select {
+    min-width: 150px;
+}
+
+.kua-product-search {
+    position: relative;
+    flex: 1;
+    min-width: 300px;
+}
+
+.kua-search-input {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.kua-search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-top: none;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 9999;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    display: none;
+}
+
+.kua-search-result-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+}
+
+.kua-search-result-item:last-child {
+    border-bottom: none;
+}
+
+.kua-search-result-item .kua-product-thumbnail {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    margin-right: 10px;
+}
+
+.kua-search-result-item .kua-product-info {
+    flex: 1;
+}
+
+.kua-search-result-item .kua-product-title {
+    margin: 0 0 5px;
+    font-size: 14px;
+}
+
+.kua-add-product {
+    white-space: nowrap;
+    margin-left: 10px;
+}
+
+/* Products Table */
+.kua-products-table-container {
+    margin-top: 20px;
+}
+
+.kua-products-table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.kua-products-table th {
+    background: #f5f5f5;
+    text-align: left;
+}
+
+.kua-number-column {
+    width: 80px;
+}
+
+.kua-description-column {
+    width: 320px;
+}
+
+.kua-number-cell {
+    width: 80px;
+    text-align: center;
+    vertical-align: top;
+    padding: 15px 10px;
+}
+
+.kua-description-cell {
+    width: 300px;
+    vertical-align: top;
+    padding: 15px 10px;
+}
+
+.kua-description-textarea {
+    width: 100%;
+    min-height: 120px;
+    margin-bottom: 10px;
+    padding: 8px;
+    border-color: #ddd;
+}
+
+.kua-save-description {
+    margin-bottom: 15px !important;
+}
+
+.kua-products-cell {
+    vertical-align: top;
+    padding: 15px 10px;
+}
+
+/* Product List in Table */
+.kua-product-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 3px;
+    background: #f9f9f9;
+    margin-bottom: 15px;
+}
+
+.kua-product-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    background: #fff;
+}
+
+.kua-product-item:last-child {
+    border-bottom: none;
+}
+
+.kua-product-thumbnail {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    margin-right: 10px;
+    border-radius: 3px;
+}
+
+.kua-product-name {
+    flex: 1;
+    margin-right: 10px;
+    font-weight: 500;
+}
+
+.kua-product-price {
+    margin-right: 10px;
+    color: #555;
+}
+
+.kua-remove-product {
+    color: #a00;
+    cursor: pointer;
+}
+
+.kua-remove-product:hover {
+    color: #dc3232;
+    text-decoration: underline;
+}
+
+/* Form actions */
+.kua-form-actions {
+    margin-top: 15px;
+}
+
+/* Loading, errors, and messages */
+.kua-loading, 
+.kua-search-error, 
+.kua-no-results {
+    padding: 10px;
+    margin: 0;
+    text-align: center;
+}
+
+.kua-loading {
+    color: #0073aa;
+}
+
+.kua-search-error {
+    color: #dc3232;
+}
+
+.kua-no-results {
+    color: #555;
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 782px) {
+    .kua-add-product-form {
+        flex-direction: column;
+    }
+    
+    .kua-product-search {
+        width: 100%;
+    }
+    
+    .kua-number-cell,
+    .kua-description-cell,
+    .kua-products-cell {
+        display: block;
+        width: 100%;
+        margin-bottom: 15px;
+    }
+    
+    .kua-products-table th {
+        display: none;
+    }
+    
+    .kua-product-item {
+        flex-wrap: wrap;
+    }
+    
+    .kua-product-price {
+        width: 100%;
+        margin: 5px 0;
+    }
+}
