@@ -59,7 +59,7 @@
 }
 
 .kua-submit-button {
-    background-color: #4CAF50;
+    background-color: #6b8ca3;
     color: white;
     padding: 12px 20px;
     border: none;
@@ -72,7 +72,7 @@
 }
 
 .kua-submit-button:hover {
-    background-color: #45a049;
+    background-color: #959563;
 }
 
 .kua-submit-button:disabled {
@@ -86,7 +86,7 @@
     border-radius: 8px;
     padding: 25px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    border-left: 5px solid #4CAF50;
+    border-left: 5px solid #959563;
 }
 
 .kua-result-number {
@@ -104,7 +104,7 @@
 .kua-number {
     font-size: 32px;
     font-weight: 700;
-    color: #4CAF50;
+    color: #e89761;
 }
 
 .kua-result-description {

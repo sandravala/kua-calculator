@@ -13,7 +13,15 @@
         <h2><?php _e('Shortcode', 'kua-calculator'); ?></h2>
         <p><?php _e('Nukopijuok šį Shortcode į bet kurį puslapį ar postą, kuriame nori atvaizduoti Feng Shui skaičiuoklę:', 'kua-calculator'); ?></p>
         <div class="kua-shortcode-display">
+            <p>Pasirenkama lytis:</p>
             <code>[kua_calculator]</code>
+            <button type="button" class="button button-secondary kua-copy-shortcode">
+                <?php _e('Kopijuoti', 'kua-calculator'); ?>
+            </button>
+        </div>
+        <div class="kua-shortcode-display">
+            <p>Tik vyriška:</p> 
+            <code>[kua_calculator gender="male"]</code>
             <button type="button" class="button button-secondary kua-copy-shortcode">
                 <?php _e('Kopijuoti', 'kua-calculator'); ?>
             </button>
