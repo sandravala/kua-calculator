@@ -1,6 +1,7 @@
 /**
  * Kua Calculator Frontend JavaScript
  * Handles all the calculator functionality and AJAX product loading
+ * Supports both Ming Gua (with gender selection) and Yearly Gua (male-only) calculators
  */
 jQuery(document).ready(function($) {
     /**
@@ -113,18 +114,27 @@ jQuery(document).ready(function($) {
      * Load associated products for a Kua number via AJAX
      * 
      * @param {number} kuaNumber - The Kua number to load products for
+     * @param {string} calculatorType - The type of calculator ('ming_gua' or 'yearly_gua')
+     * @param {jQuery} $container - The container element for the calculator
      */
-    function loadKuaProducts(kuaNumber) {
+    function loadKuaProducts(kuaNumber, calculatorType, $container) {
+        // Get the product recommendations and products list for this calculator
+        const $recommendations = $container.find('.kua-product-recommendations');
+        const $productsList = $container.find('.kua-products-list');
+        
         // Show loading indicator in products list
-        $('#kua-product-recommendations').hide();
-        $('#kua-products-list').html('<p class="kua-loading">' + kua_calculator_vars.loading_text + '</p>');
+        $recommendations.hide();
+        $productsList.html('<p class="kua-loading">' + kua_calculator_vars.loading_text + '</p>');
+        
+        // Determine which action to use based on calculator type
+        const ajaxAction = calculatorType === 'yearly_gua' ? 'get_yearly_gua_products' : 'get_kua_products';
         
         // AJAX request to get products
         $.ajax({
             url: kua_calculator_vars.ajax_url,
             type: 'POST',
             data: {
-                action: 'get_kua_products',
+                action: ajaxAction,
                 kua_number: kuaNumber,
                 nonce: kua_calculator_vars.nonce
             },
@@ -148,38 +158,50 @@ jQuery(document).ready(function($) {
                     });
                     
                     productsHtml += '</div>';
-                    $('#kua-products-list').html(productsHtml);
-                    $('#kua-product-recommendations').show();
+                    $productsList.html(productsHtml);
+                    $recommendations.show();
                 } else {
                     // No products found
-                    $('#kua-products-list').html('');
-                    $('#kua-product-recommendations').hide();
+                    $productsList.html('');
+                    $recommendations.hide();
                 }
             },
             error: function() {
                 // Error fetching products
-                $('#kua-products-list').html('<p>' + kua_calculator_vars.error_text + '</p>');
-                $('#kua-product-recommendations').hide();
+                $productsList.html('<p>' + kua_calculator_vars.error_text + '</p>');
+                $recommendations.hide();
             }
         });
     }
     
     // Set date input to Lithuanian format
     if (kua_calculator_vars.locale === 'lt_LT') {
-        document.getElementById('kua-birth-date').lang = 'lt';
+        $('input[id="kua-birth-date"]').each(function() {
+            this.lang = 'lt';
+        });
     }
     
-    // Handle calculate button click
-    $('#kua-calculate-button').on('click', function() {
+    // Handle calculate button click for all calculators
+    $('.kua-calculate-button').on('click', function() {
+        // Get the container for this calculator
+        const $container = $(this).closest('.kua-calculator-container');
+        const $form = $container.find('form');
+        const calculatorType = $form.data('calculator-type');
+        
         // Get form values
-        const birthDateStr = $('#kua-birth-date').val();
-        const gender = $('input[name="gender"]:checked').val();
+        const birthDateStr = $form.find('input[name="birth_date"]').val();
+        const gender = $form.find('input[name="gender"]:checked').val();
+        
+        // Results and error elements for this calculator
+        const $result = $container.find('.kua-result');
+        const $error = $container.find('.kua-error');
+        const $errorMessage = $container.find('.kua-error-message');
         
         // Validate input
         if (!birthDateStr || !gender) {
-            $('#kua-error-message').text(kua_calculator_vars.error_incomplete);
-            $('#kua-error').fadeIn();
-            $('#kua-result').hide();
+            $errorMessage.text(kua_calculator_vars.error_incomplete);
+            $error.fadeIn();
+            $result.hide();
             return;
         }
         
@@ -190,24 +212,30 @@ jQuery(document).ready(function($) {
         const kuaNumber = calculateKua(birthDate, gender);
         
         if (kuaNumber === 'error') {
-            $('#kua-error-message').text(kua_calculator_vars.error_calculation);
-            $('#kua-error').fadeIn();
-            $('#kua-result').hide();
+            $errorMessage.text(kua_calculator_vars.error_calculation);
+            $error.fadeIn();
+            $result.hide();
             return;
         }
         
         // Display results
-        $('#kua-number-display').text(kuaNumber);
-        $('#kua-description').text(kua_calculator_vars.descriptions[kuaNumber] || '');
-        $('#kua-error').hide();
-        $('#kua-result').fadeIn();
+        $container.find('.kua-number-display').text(kuaNumber);
+        
+        // Use the appropriate descriptions based on calculator type
+        const descriptions = (calculatorType === 'yearly_gua') 
+            ? kua_calculator_vars.yearly_gua_descriptions 
+            : kua_calculator_vars.ming_gua_descriptions;
+            
+        $container.find('.kua-description').text(descriptions[kuaNumber] || '');
+        $error.hide();
+        $result.fadeIn();
         
         // Load associated products
-        loadKuaProducts(kuaNumber);
+        loadKuaProducts(kuaNumber, calculatorType, $container);
         
         // Scroll to result
         $('html, body').animate({
-            scrollTop: $('#kua-result').offset().top - 50
+            scrollTop: $result.offset().top - 50
         }, 500);
     });
 });

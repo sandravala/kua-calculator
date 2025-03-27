@@ -1,6 +1,6 @@
 /**
  * Kua Calculator Admin JavaScript
- * Handles product search and association with Kua numbers
+ * Handles product search and association with Kua numbers for both Ming Gua and Yearly Gua
  */
 jQuery(document).ready(function($) {
     // Copy shortcode functionality
@@ -23,10 +23,12 @@ jQuery(document).ready(function($) {
     // Product search functionality
     let searchTimeout;
     let selectedKuaNumber = '';
+    let calculatorType = '';
     
     // Handle Kua number selection
     $('#kua-number-select').on('change', function() {
         selectedKuaNumber = $(this).val();
+        calculatorType = $(this).data('calculator-type');
         
         // Clear search field and results if no Kua number is selected
         if (!selectedKuaNumber) {
@@ -115,10 +117,11 @@ jQuery(document).ready(function($) {
         const $productItem = $(this).closest('.kua-search-result-item');
         const productId = $(this).data('id');
         const productName = $(this).data('name');
-        //const productPrice = $(this).data('price');
         const productPrice = $productItem.find('.kua-product-price').html();
         const productImage = $(this).data('image');
-        const targetList = $('#kua-products-list-' + selectedKuaNumber);
+        
+        // Target the correct product list based on the calculator type
+        const targetList = $('#' + calculatorType + '-products-list-' + selectedKuaNumber);
         
         // Check if product already exists in the list
         if (targetList.find('li[data-product-id="' + productId + '"]').length > 0) {
@@ -150,5 +153,26 @@ jQuery(document).ready(function($) {
         $(this).closest('li').fadeOut(300, function() {
             $(this).remove();
         });
+    });
+    
+    // Handle description changes - update the hidden field value before form submission
+    $(document).on('input', '.kua-description-textarea', function() {
+        // Get the textarea value
+        const description = $(this).val();
+        
+        // Find the closest form and update its hidden description field
+        const $form = $(this).closest('tr').find('.kua-combined-form');
+        $form.find('input[name="kua_description"]').val(description);
+    });
+    
+    // Before form submission, make sure the description is up to date
+    $(document).on('submit', '.kua-combined-form', function() {
+        const $form = $(this);
+        const kua_number = $form.find('input[name="kua_number"]').val();
+        const calculatorType = $form.find('input[name="action"]').val().includes('yearly') ? 'yearly_gua' : 'ming_gua';
+        
+        // Get the textarea content and update the hidden field
+        const descriptionContent = $('#' + calculatorType + '-description-' + kua_number).val();
+        $form.find('input[name="kua_description"]').val(descriptionContent);
     });
 });

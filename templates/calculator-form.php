@@ -1,5 +1,13 @@
-<div class="kua-calculator-container">
-    <form id="kua-calculator-form" class="kua-calculator-form">
+<?php
+// Determine if this is a yearly gua (male only) calculator
+$is_yearly_gua = isset($calculator_type) && $calculator_type === 'yearly_gua';
+$form_id = $is_yearly_gua ? 'yearly-gua-form' : 'ming-gua-form';
+$calculator_class = $is_yearly_gua ? 'yearly-gua-calculator' : 'ming-gua-calculator';
+$button_text = $is_yearly_gua ? 'Sužinoti metų skaičių' : 'Sužinoti asmeninį skaičių';
+$kua_result_title = $is_yearly_gua ? 'Metų feng shui skaičius:' : 'Jūsų asmeninis feng shui skaičius:';
+?>
+<div class="kua-calculator-container <?php echo esc_attr($calculator_class); ?>">
+    <form id="<?php echo esc_attr($form_id); ?>" class="kua-calculator-form" data-calculator-type="<?php echo $is_yearly_gua ? 'yearly_gua' : 'ming_gua'; ?>">
         <div class="kua-form-row">
             <div class="kua-form-group">
                 <label for="kua-birth-date"><?php _e('Gimimo data:', 'kua-calculator'); ?></label>
@@ -29,29 +37,29 @@
         <?php endif; ?>
         
         <div class="kua-form-row">
-            <button type="button" id="kua-calculate-button" class="kua-submit-button">
-                <?php _e('Apskaičiuoti Kua skaičių', 'kua-calculator'); ?>
+            <button type="button" class="kua-calculate-button kua-submit-button">
+                <?php _e(esc_html($button_text), 'kua-calculator'); ?>
             </button>
         </div>
     </form>
 
-    <div id="kua-result" class="kua-result-container" style="display: none;">
+    <div class="kua-result kua-result-container" style="display: none;">
         <div class="kua-result-number">
-            <span class="kua-label"><?php _e('Jūsų Kua skaitmuo:', 'kua-calculator'); ?></span>
-            <span id="kua-number-display" class="kua-number"></span>
+            <span class="kua-label"><?php _e(esc_html($kua_result_title), 'kua-calculator'); ?></span>
+            <span class="kua-number-display kua-number"></span>
         </div>
 
         <div class="kua-result-description">
-            <p id="kua-description"></p>
+            <p class="kua-description"></p>
         </div>
 
-        <div id="kua-product-recommendations" class="kua-products" style="display: none;">
+        <div class="kua-product-recommendations kua-products" style="display: none;">
             <h3><?php _e('Rekomenduojami produktai', 'kua-calculator'); ?></h3>
-            <div id="kua-products-list"></div>
+            <div class="kua-products-list"></div>
         </div>
     </div>
 
-    <div id="kua-error" class="kua-error-container" style="display: none;">
-        <p id="kua-error-message"></p>
+    <div class="kua-error kua-error-container" style="display: none;">
+        <p class="kua-error-message"></p>
     </div>
 </div>

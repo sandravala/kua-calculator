@@ -36,8 +36,9 @@ class Kua_Calculator
      */
     public function __construct()
     {
-        // Register shortcode
-        add_shortcode('kua_calculator', array($this, 'render_calculator'));
+        // Register shortcodes
+        add_shortcode('ming_gua', array($this, 'render_calculator'));
+        add_shortcode('yearly_gua', array($this, 'render_yearly_gua'));
 
         // Register scripts and styles
         add_action('wp_enqueue_scripts', array($this, 'register_scripts'));
@@ -51,11 +52,14 @@ class Kua_Calculator
         // AJAX handlers
         add_action('wp_ajax_get_kua_products', array($this, 'ajax_get_kua_products'));
         add_action('wp_ajax_nopriv_get_kua_products', array($this, 'ajax_get_kua_products'));
+        add_action('wp_ajax_get_yearly_gua_products', array($this, 'ajax_get_yearly_gua_products'));
+        add_action('wp_ajax_nopriv_get_yearly_gua_products', array($this, 'ajax_get_yearly_gua_products'));
         add_action('wp_ajax_search_wc_products', array($this, 'ajax_search_wc_products'));
 
         // Admin AJAX handlers
         add_action('admin_post_save_kua_products', array($this, 'save_kua_products_handler'));
-        add_action('admin_post_save_kua_description', array($this, 'save_kua_description_handler'));
+        add_action('admin_post_save_yearly_gua_products', array($this, 'save_yearly_gua_products_handler'));
+        add_action('admin_post_save_kua_description', array($this, 'save_kua_description_handler')); // Kept for backwards compatibility
     }
 
     /**
@@ -107,7 +111,8 @@ class Kua_Calculator
             'view_product_text' => __('Peržiūrėti produktą', 'kua-calculator'),
             'error_incomplete' => __('Užpildykite visus laukelius', 'kua-calculator'),
             'error_calculation' => __('Klaida atliekant skaičiavimą. Pasitikrinkite, ar gerai įvedėte savo gimimo datą.', 'kua-calculator'),
-            'descriptions' => $this->get_kua_descriptions_with_custom(),
+            'ming_gua_descriptions' => $this->get_kua_descriptions_with_custom('ming_gua'),
+            'yearly_gua_descriptions' => $this->get_kua_descriptions_with_custom('yearly_gua'),
             'locale' => get_locale()
         ));
     }
@@ -125,12 +130,44 @@ class Kua_Calculator
         $atts = shortcode_atts([
             'gender' => ''
         ], $atts, 'calculator_shortcode');
+        
+        // Add the calculator type
+        $atts['calculator_type'] = 'ming_gua';
 
         // Start output buffering
         ob_start();
 
-        // Option 1: extract to get variables ($default_birth_date, $default_gender)
+        // Extract to get variables
         extract($atts);
+        
+        // Include the template
+        include(KUA_CALCULATOR_PLUGIN_DIR . 'templates/calculator-form.php');
+
+        // Return the buffered content
+        return ob_get_clean();
+    }
+    
+    /**
+     * Render the yearly gua calculator (male-only) via shortcode
+     */
+    public function render_yearly_gua($atts)
+    {
+        // Enqueue the required scripts and styles
+        wp_enqueue_script('kua-calculator-js');
+        wp_enqueue_style('kua-calculator-css');
+
+        // Set gender to male for yearly gua
+        $atts = [
+            'gender' => 'male',
+            'calculator_type' => 'yearly_gua'
+        ];
+
+        // Start output buffering
+        ob_start();
+
+        // Extract to get variables
+        extract($atts);
+        
         // Include the template
         include(KUA_CALCULATOR_PLUGIN_DIR . 'templates/calculator-form.php');
 
@@ -433,15 +470,21 @@ class Kua_Calculator
 
     /**
      * Get custom descriptions for Kua numbers from options
+     * 
+     * @param string $type The type of calculator ('ming_gua' or 'yearly_gua')
+     * @return array Array of descriptions indexed by Kua number
      */
-    public function get_kua_descriptions_with_custom()
+    public function get_kua_descriptions_with_custom($type = 'ming_gua')
     {
         $default_descriptions = self::get_kua_descriptions();
         $custom_descriptions = array();
+        
+        // Determine the option prefix based on the calculator type
+        $option_prefix = ($type === 'yearly_gua') ? 'yearly_gua_description_' : 'kua_calculator_description_';
 
         // Get custom descriptions from options
         foreach (array(1, 2, 3, 4, 6, 7, 8, 9) as $kua_number) {
-            $custom_description = get_option('kua_calculator_description_' . $kua_number, '');
+            $custom_description = get_option($option_prefix . $kua_number, '');
             if (!empty($custom_description)) {
                 $custom_descriptions[$kua_number] = $custom_description;
             } else {
@@ -453,7 +496,7 @@ class Kua_Calculator
     }
 
     /**
-     * AJAX handler for getting products associated with a Kua number
+     * AJAX handler for getting products associated with a Kua number (ming gua)
      */
     public function ajax_get_kua_products()
     {
@@ -472,6 +515,34 @@ class Kua_Calculator
 
         // Get products for this Kua number
         $products = $this->get_kua_products($kua_number);
+
+        // Send response
+        wp_send_json_success(array(
+            'kua_number' => $kua_number,
+            'products' => $products
+        ));
+    }
+    
+    /**
+     * AJAX handler for getting products associated with a Yearly Gua number (male-only)
+     */
+    public function ajax_get_yearly_gua_products()
+    {
+        // Verify nonce
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'kua_calculator_nonce')) {
+            wp_send_json_error(array('message' => 'Security check failed.'));
+        }
+
+        // Get Kua number from request
+        $kua_number = isset($_POST['kua_number']) ? intval($_POST['kua_number']) : 0;
+
+        // Validate Kua number
+        if (!in_array($kua_number, array(1, 2, 3, 4, 6, 7, 8, 9))) {
+            wp_send_json_error(array('message' => 'Nėra tokio Kua skaičiaus.'));
+        }
+
+        // Get products for this Kua number
+        $products = $this->get_yearly_gua_products($kua_number);
 
         // Send response
         wp_send_json_success(array(
@@ -535,7 +606,7 @@ class Kua_Calculator
     }
 
     /**
-     * Admin handler for saving product associations
+     * Admin handler for saving product associations and description for Ming Gua
      */
     public function save_kua_products_handler()
     {
@@ -553,13 +624,68 @@ class Kua_Calculator
         // Get product IDs from request
         $product_ids = isset($_POST['product_ids']) ? $_POST['product_ids'] : array();
 
-        // Save associations
-        $result = $this->save_kua_product_associations($kua_number, $product_ids);
+        // Get description from request
+        $description = isset($_POST['kua_description']) ? $_POST['kua_description'] : '';
+
+        // Save products associations
+        $products_result = $this->save_kua_product_associations($kua_number, $product_ids);
+        
+        // Save description, specifying this is for ming_gua
+        $description_result = $this->save_kua_description($kua_number, $description, 'ming_gua');
+        
+        // Success if both operations succeeded
+        $result = $products_result && $description_result;
 
         // Redirect back to admin page
         $redirect_url = add_query_arg(
             array(
                 'page' => 'kua-calculator-products',
+                'tab' => 'ming_gua',
+                'updated' => $result ? 'true' : 'false'
+            ),
+            admin_url('admin.php')
+        );
+
+        wp_safe_redirect($redirect_url);
+        exit();
+    }
+    
+    /**
+     * Admin handler for saving product associations and description for Yearly Gua
+     */
+    public function save_yearly_gua_products_handler()
+    {
+        // Check user capabilities
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'kua-calculator'));
+        }
+
+        // Verify nonce
+        $kua_number = isset($_POST['kua_number']) ? intval($_POST['kua_number']) : 0;
+        if (!isset($_POST['yearly_gua_nonce_' . $kua_number]) || !wp_verify_nonce($_POST['yearly_gua_nonce_' . $kua_number], 'save_yearly_gua_products_' . $kua_number)) {
+            wp_die(__('Security check failed.', 'kua-calculator'));
+        }
+
+        // Get product IDs from request
+        $product_ids = isset($_POST['product_ids']) ? $_POST['product_ids'] : array();
+        
+        // Get description from request
+        $description = isset($_POST['kua_description']) ? $_POST['kua_description'] : '';
+
+        // Save products associations
+        $products_result = $this->save_yearly_gua_product_associations($kua_number, $product_ids);
+        
+        // Save description, specifying this is for yearly_gua
+        $description_result = $this->save_kua_description($kua_number, $description, 'yearly_gua');
+        
+        // Success if both operations succeeded
+        $result = $products_result && $description_result;
+
+        // Redirect back to admin page with the yearly gua tab active
+        $redirect_url = add_query_arg(
+            array(
+                'page' => 'kua-calculator-products',
+                'tab' => 'yearly_gua',
                 'updated' => $result ? 'true' : 'false'
             ),
             admin_url('admin.php')
@@ -570,7 +696,9 @@ class Kua_Calculator
     }
 
     /**
-     * Admin handler for saving Kua descriptions
+     * Admin handler for saving Kua descriptions - Kept for backwards compatibility
+     * Now descriptions are saved together with products in the save_kua_products_handler
+     * and save_yearly_gua_products_handler methods
      */
     public function save_kua_description_handler()
     {
@@ -587,14 +715,21 @@ class Kua_Calculator
 
         // Get description from request
         $description = isset($_POST['kua_description']) ? $_POST['kua_description'] : '';
+        
+        // Determine the calculator type (default to ming_gua for backward compatibility)
+        $type = isset($_POST['calculator_type']) ? sanitize_text_field($_POST['calculator_type']) : 'ming_gua';
 
-        // Save description
-        $result = $this->save_kua_description($kua_number, $description);
+        // Save description with the correct type
+        $result = $this->save_kua_description($kua_number, $description, $type);
+
+        // Get the current tab for redirect
+        $tab = ($type === 'yearly_gua') ? 'yearly_gua' : 'ming_gua';
 
         // Redirect back to admin page
         $redirect_url = add_query_arg(
             array(
                 'page' => 'kua-calculator-products',
+                'tab' => $tab,
                 'updated' => $result ? 'true' : 'false'
             ),
             admin_url('admin.php')
@@ -605,7 +740,7 @@ class Kua_Calculator
     }
 
     /**
-     * Save product associations with Kua numbers (admin function)
+     * Save product associations with Ming Gua numbers (admin function)
      */
     public function save_kua_product_associations($kua_number, $product_ids)
     {
@@ -621,11 +756,34 @@ class Kua_Calculator
 
         return true;
     }
+    
+    /**
+     * Save product associations with Yearly Gua numbers (admin function)
+     */
+    public function save_yearly_gua_product_associations($kua_number, $product_ids)
+    {
+        if (!in_array($kua_number, array(1, 2, 3, 4, 6, 7, 8, 9))) {
+            return false;
+        }
+
+        // Sanitize product IDs
+        $product_ids = array_map('intval', $product_ids);
+
+        // Save the association with a different option name
+        update_option('yearly_gua_products_' . $kua_number, $product_ids);
+
+        return true;
+    }
 
     /**
      * Save custom description for a Kua number
+     * 
+     * @param int $kua_number The Kua number to save the description for
+     * @param string $description The description content
+     * @param string $type The type of calculator ('ming_gua' or 'yearly_gua')
+     * @return bool Whether the save was successful
      */
-    public function save_kua_description($kua_number, $description)
+    public function save_kua_description($kua_number, $description, $type = 'ming_gua')
     {
         if (!in_array($kua_number, array(1, 2, 3, 4, 6, 7, 8, 9))) {
             return false;
@@ -633,15 +791,18 @@ class Kua_Calculator
 
         // Sanitize description
         $description = wp_kses_post($description);
+        
+        // Determine the option name based on calculator type
+        $option_name = ($type === 'yearly_gua') ? 'yearly_gua_description_' . $kua_number : 'kua_calculator_description_' . $kua_number;
 
         // Save the description
-        update_option('kua_calculator_description_' . $kua_number, $description);
+        update_option($option_name, $description);
 
         return true;
     }
 
     /**
-     * Get products associated with a specific Kua number
+     * Get products associated with a specific Ming Gua number
      */
     public function get_kua_products($kua_number)
     {
@@ -650,6 +811,38 @@ class Kua_Calculator
         }
 
         $product_ids = get_option('kua_calculator_products_' . $kua_number, array());
+
+        if (empty($product_ids) || !function_exists('wc_get_product')) {
+            return array();
+        }
+
+        $products = array();
+        foreach ($product_ids as $product_id) {
+            $product = wc_get_product($product_id);
+            if ($product && $product->is_visible()) {
+                $products[] = array(
+                    'id' => $product_id,
+                    'name' => $product->get_name(),
+                    'price_html' => $product->get_price_html(),
+                    'url' => get_permalink($product_id),
+                    'image' => get_the_post_thumbnail_url($product_id, 'thumbnail')
+                );
+            }
+        }
+
+        return $products;
+    }
+    
+    /**
+     * Get products associated with a specific Yearly Gua number
+     */
+    public function get_yearly_gua_products($kua_number)
+    {
+        if (!in_array($kua_number, array(1, 2, 3, 4, 6, 7, 8, 9))) {
+            return array();
+        }
+
+        $product_ids = get_option('yearly_gua_products_' . $kua_number, array());
 
         if (empty($product_ids) || !function_exists('wc_get_product')) {
             return array();

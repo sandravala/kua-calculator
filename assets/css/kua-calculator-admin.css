@@ -239,6 +239,11 @@
     margin-top: 15px;
 }
 
+/* Combined form styles */
+.kua-combined-form {
+    display: contents; /* This allows the form to span across multiple table cells */
+}
+
 /* Loading, errors, and messages */
 .kua-loading, 
 .kua-search-error, 

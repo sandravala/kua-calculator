@@ -1,3 +1,7 @@
+<?php
+// Default to ming_gua tab if none specified
+$active_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'ming_gua';
+?>
 <div class="wrap kua-admin-container">
     <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
     
@@ -13,23 +17,38 @@
         <h2><?php _e('Shortcode', 'kua-calculator'); ?></h2>
         <p><?php _e('Nukopijuok šį Shortcode į bet kurį puslapį ar postą, kuriame nori atvaizduoti Feng Shui skaičiuoklę:', 'kua-calculator'); ?></p>
         <div class="kua-shortcode-display">
-            <p>Pasirenkama lytis:</p>
-            <code>[kua_calculator]</code>
+            <p>Ming Gua (Asmeninis skaičius):</p>
+            <code>[ming_gua]</code>
             <button type="button" class="button button-secondary kua-copy-shortcode">
                 <?php _e('Kopijuoti', 'kua-calculator'); ?>
             </button>
         </div>
         <div class="kua-shortcode-display">
-            <p>Tik vyriška:</p> 
-            <code>[kua_calculator gender="male"]</code>
+            <p>Yearly Gua (Metinis skaičius, tik vyrams):</p> 
+            <code>[yearly_gua]</code>
             <button type="button" class="button button-secondary kua-copy-shortcode">
                 <?php _e('Kopijuoti', 'kua-calculator'); ?>
             </button>
         </div>
     </div>
     
+    <div class="kua-admin-tabs">
+        <h2 class="nav-tab-wrapper">
+            <a href="?page=kua-calculator-products&tab=ming_gua" class="nav-tab <?php echo $active_tab === 'ming_gua' ? 'nav-tab-active' : ''; ?>">
+                <?php _e('Ming Gua (Asmeninis)', 'kua-calculator'); ?>
+            </a>
+            <a href="?page=kua-calculator-products&tab=yearly_gua" class="nav-tab <?php echo $active_tab === 'yearly_gua' ? 'nav-tab-active' : ''; ?>">
+                <?php _e('Yearly Gua (Metinis)', 'kua-calculator'); ?>
+            </a>
+        </h2>
+    </div>
+    
     <div class="kua-admin-products-management">
-        <h2><?php _e('Kua skaičiaus ir produktų susiejimas', 'kua-calculator'); ?></h2>
+        <?php if ($active_tab === 'ming_gua') : ?>
+            <h2><?php _e('Ming Gua skaičiaus ir produktų susiejimas', 'kua-calculator'); ?></h2>
+        <?php else : ?>
+            <h2><?php _e('Yearly Gua skaičiaus ir produktų susiejimas', 'kua-calculator'); ?></h2>
+        <?php endif; ?>
         
         <?php if (!function_exists('wc_get_products')) : ?>
             <div class="notice notice-warning">
@@ -39,11 +58,11 @@
             <div class="kua-product-search-container">
                 <h3><?php _e('Pridėti produktą', 'kua-calculator'); ?></h3>
                 <div class="kua-add-product-form">
-                    <select id="kua-number-select" class="kua-select">
-                        <option value=""><?php _e('Pasirinkti Kua skaičių', 'kua-calculator'); ?></option>
+                    <select id="kua-number-select" class="kua-select" data-calculator-type="<?php echo esc_attr($active_tab); ?>">
+                        <option value=""><?php _e('Pasirinkti Ming Gua skaičių', 'kua-calculator'); ?></option>
                         <?php foreach ([1, 2, 3, 4, 6, 7, 8, 9] as $kua_number) : ?>
                             <option value="<?php echo esc_attr($kua_number); ?>">
-                                <?php printf(__('Kua %d', 'kua-calculator'), $kua_number); ?>
+                                <?php printf(__('%d', 'kua-calculator'), $kua_number); ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
@@ -69,37 +88,40 @@
                     <?php 
                     // Get all Kua descriptions
                     $kua_descriptions = Kua_Calculator::get_kua_descriptions();
-                    $custom_descriptions = $this->get_kua_descriptions_with_custom();
+                    
+                    // Get custom descriptions for the active tab
+                    $custom_descriptions = $this->get_kua_descriptions_with_custom($active_tab);
                     
                     // For each Kua number
                     foreach ([1, 2, 3, 4, 6, 7, 8, 9] as $kua_number) :
-                        // Get current products 
-                        $saved_product_ids = get_option('kua_calculator_products_' . $kua_number, []);
+                        if ($active_tab === 'ming_gua') {
+                            // For Ming Gua tab, get regular products
+                            $saved_product_ids = get_option('kua_calculator_products_' . $kua_number, []);
+                            $form_action = 'save_kua_products';
+                            $nonce_name = 'kua_nonce_' . $kua_number;
+                            $nonce_action = 'save_kua_products_' . $kua_number;
+                        } else {
+                            // For Yearly Gua tab, get yearly gua products
+                            $saved_product_ids = get_option('yearly_gua_products_' . $kua_number, []);
+                            $form_action = 'save_yearly_gua_products';
+                            $nonce_name = 'yearly_gua_nonce_' . $kua_number;
+                            $nonce_action = 'save_yearly_gua_products_' . $kua_number;
+                        }
                     ?>
                         <tr>
                             <td class="kua-number-cell">
                                 <strong><?php echo esc_html($kua_number); ?></strong>
                             </td>
-                            <td class="kua-description-cell">
-                                <form method="post" action="<?php echo admin_url('admin-post.php'); ?>" class="kua-description-form">
-                                    <input type="hidden" name="action" value="save_kua_description">
-                                    <input type="hidden" name="kua_number" value="<?php echo $kua_number; ?>">
-                                    <?php wp_nonce_field('save_kua_description_' . $kua_number, 'kua_description_nonce_' . $kua_number); ?>
-                                    
-                                    <textarea name="kua_description" class="kua-description-textarea"><?php echo esc_textarea($custom_descriptions[$kua_number]); ?></textarea>
-                                    
-                                    <button type="submit" class="button button-primary kua-save-description">
-                                        <?php _e('Išsaugoti aprašymą', 'kua-calculator'); ?>
-                                    </button>
-                                </form>
-                            </td>
-                            <td class="kua-products-cell">
-                                <form method="post" action="<?php echo admin_url('admin-post.php'); ?>" class="kua-product-form">
-                                    <input type="hidden" name="action" value="save_kua_products">
-                                    <input type="hidden" name="kua_number" value="<?php echo $kua_number; ?>">
-                                    <?php wp_nonce_field('save_kua_products_' . $kua_number, 'kua_nonce_' . $kua_number); ?>
-                                    
-                                    <ul class="kua-product-list" id="kua-products-list-<?php echo $kua_number; ?>" data-kua="<?php echo $kua_number; ?>">
+                            <form method="post" action="<?php echo admin_url('admin-post.php'); ?>" class="kua-combined-form">
+                                <input type="hidden" name="action" value="<?php echo $form_action; ?>">
+                                <input type="hidden" name="kua_number" value="<?php echo $kua_number; ?>">
+                                <?php wp_nonce_field($nonce_action, $nonce_name); ?>
+                                
+                                <td class="kua-description-cell">
+                                    <textarea name="kua_description" class="kua-description-textarea" id="<?php echo $active_tab; ?>-description-<?php echo $kua_number; ?>"><?php echo esc_textarea($custom_descriptions[$kua_number]); ?></textarea>
+                                </td>
+                                <td class="kua-products-cell">
+                                    <ul class="kua-product-list" id="<?php echo $active_tab; ?>-products-list-<?php echo $kua_number; ?>" data-kua="<?php echo $kua_number; ?>" data-type="<?php echo $active_tab; ?>">
                                         <?php
                                         // Display already selected products
                                         foreach ($saved_product_ids as $product_id) :
@@ -123,11 +145,11 @@
                                     
                                     <div class="kua-form-actions">
                                         <button type="submit" class="button button-primary">
-                                            <?php _e('Išsaugoti produktus', 'kua-calculator'); ?>
+                                            <?php _e('Išsaugoti aprašymą ir produktus', 'kua-calculator'); ?>
                                         </button>
                                     </div>
-                                </form>
-                            </td>
+                                </td>
+                            </form>
                         </tr>
                     <?php endforeach; ?>
                     </tbody>
@@ -143,6 +165,6 @@
         <span class="kua-product-name">{name}</span>
         <span class="kua-product-price">{price}</span>
         <input type="hidden" name="product_ids[]" value="{id}">
-        <button type="button" class="button-link kua-remove-product"><?php _e('Remove', 'kua-calculator'); ?></button>
+        <button type="button" class="button-link kua-remove-product"><?php _e('Pašalinti', 'kua-calculator'); ?></button>
     </li>
 </script>
