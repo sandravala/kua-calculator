@@ -4,7 +4,7 @@
  * Plugin Name: Feng Shui skaičiuoklė
  * Plugin URI: https://12gm.lt
  * Description: Paskaičiuoja Kua skaičių pagal įvestą gimimo datą ir lytį. Į Puslapį įdedama per shortcode [kua_calculator]. Galima suporuoti su produktais.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: Sandra Valavičiūtė
  * Author URI: https://12gm.lt
  * Text Domain: kua-calculator
@@ -16,7 +16,7 @@ if (!defined('WPINC')) {
     die;
 }
 
-define('KUA_CALCULATOR_VERSION', '1.0.0');
+define('KUA_CALCULATOR_VERSION', '1.1.0');
 define('KUA_CALCULATOR_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('KUA_CALCULATOR_PLUGIN_URL', plugin_dir_url(__FILE__));
 

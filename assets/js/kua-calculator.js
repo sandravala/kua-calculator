@@ -51,7 +51,7 @@ jQuery(document).ready(function($) {
      * @param {string} gender - 'male' or 'female'
      * @return {number|string} - Kua number or 'error'
      */
-    function calculateKua(birthDate, gender) {
+    function calculateKua(birthDate, gender, yearlyGua = false) {
         const year = birthDate.getFullYear();
         const month = birthDate.getMonth() + 1; // JavaScript months are 0-11
         const day = birthDate.getDate();
@@ -102,10 +102,13 @@ jQuery(document).ready(function($) {
             kuaNumber = newKua;
         }
         
-        // Special cases: if Kua = 5 for males, become 2; if Kua = 5 for females, become 8
-        if (kuaNumber === 5) {
-            kuaNumber = (gender === 'male') ? 2 : 8;
+        if(!yearlyGua) {
+            // Special cases: if Kua = 5 for males, become 2; if Kua = 5 for females, become 8
+            if (kuaNumber === 5) {
+                kuaNumber = (gender === 'male') ? 2 : 8;
+            }
         }
+
         
         return kuaNumber;
     }
@@ -209,7 +212,7 @@ jQuery(document).ready(function($) {
         const birthDate = new Date(birthDateStr);
         
         // Calculate Kua number
-        const kuaNumber = calculateKua(birthDate, gender);
+        const kuaNumber = calculateKua(birthDate, gender, calculatorType === 'yearly_gua');
         
         if (kuaNumber === 'error') {
             $errorMessage.text(kua_calculator_vars.error_calculation);
