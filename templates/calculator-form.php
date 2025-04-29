@@ -3,8 +3,8 @@
 $is_yearly_gua = isset($calculator_type) && $calculator_type === 'yearly_gua';
 $form_id = $is_yearly_gua ? 'yearly-gua-form' : 'ming-gua-form';
 $calculator_class = $is_yearly_gua ? 'yearly-gua-calculator' : 'ming-gua-calculator';
-$button_text = $is_yearly_gua ? 'Sužinoti skaičių' : 'Sužinoti asmeninį skaičių';
-$kua_result_title = $is_yearly_gua ? 'Jūsų skaičius:' : 'Jūsų asmeninis feng shui skaičius:';
+$button_text = $is_yearly_gua ? 'Sužinoti skaičių' : 'Sužinoti skaičių';
+$kua_result_title = $is_yearly_gua ? 'Jūsų skaičius:' : 'Jūsų skaičius:';
 ?>
 <div class="kua-calculator-container <?php echo esc_attr($calculator_class); ?>">
     <form id="<?php echo esc_attr($form_id); ?>" class="kua-calculator-form" data-calculator-type="<?php echo $is_yearly_gua ? 'yearly_gua' : 'ming_gua'; ?>">
